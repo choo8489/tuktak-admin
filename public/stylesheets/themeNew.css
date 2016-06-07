@@ -1,0 +1,67 @@
+table, th, td {
+    border: 1px solid black;
+}
+
+#page-number {
+    width: 100%;
+    /*display: inline-block;*/
+    margin-left: 50px;
+}
+
+#page-number div {
+    margin-left: 320px;
+}
+
+#page-number p {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.table-striped > tbody > tr.table-header {
+    background-color: #787878;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.table-header th {
+    text-align: center;
+}
+
+.table > tbody > tr > td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+button.btn-stop {
+    background-color: #7eaeed;
+    color: #fafafa;
+}
+
+td a {
+    color: #676a6c;
+}
+
+#excelDataTable tr:hover td.hover {
+    background-color: #8EBCED;
+    color: #fafafa;
+}
+
+#change-body {
+    width: 50%;
+    margin-left: 50px;
+    margin-bottom: 50px;
+}
+
+#change-body p {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.btn-option {
+    border-color: #dddddd;
+    width: 100px;
+    height: 40px;
+    margin-top: 20px;
+    background-color: #ababab;
+    color: #ffffff;
+}

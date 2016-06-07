@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../commonHeader.ejs %>
+    <% include ../commonScripts.ejs %>
+</head>
+<body>
+<div id="wrapper">
+    <% include ../commonAsideLeft.ejs %>
+    <% include ../commonAsideTop.ejs %>
+
+    <!-- page title -->
+    <section id="middle" style="margin-bottom: 100px">
+        <!-- page title -->
+        <header id="page-header">
+            <h1>Sites List</h1>
+            <ol class="breadcrumb">
+                <li><a href="#">Sites Management</a></li>
+                <li><a href="#">Sites List</a></li>
+                <li class="active">Sites Create</li>
+            </ol>
+        </header>
+        <!-- /page title -->
+
+        <!-- page body -->
+        <div id="change-body">
+            <div>
+                <p>Title</p>
+                <input type="text" name="title" class="form-control">
+            </div>
+            <div>
+                <p>Description</p>
+                <input type="text" name="description" class="form-control">
+            </div>
+            <div>
+                <p>Thumbnail</p>
+                <input type="text" name="thumbnail" class="form-control">
+            </div>
+            <div>
+                <p>Operators</p>
+                <input type="text" name="operators" class="form-control">
+            </div>
+            <div>
+                <p>isPrivate</p>
+                <label class="radio-inline">
+                    <input type="radio" name="isPrivate" id="true" value="true"> True
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isPrivate" id="false" value="false" checked="checked"> False
+                </label>
+            </div>
+            <div style="text-align: end">
+                <button class="btn-option"
+                        onclick="create_btn()">
+                    Create
+                </button>
+                <button class="btn-option" style="margin-left: 10px;"
+                        onclick="cancel_btn()">
+                    Cancel
+                </button>
+            </div>
+            <!-- /page body -->
+        </div>
+    </section>
+</div>
+
+<script type="text/javascript">
+//    var token = Cookies.get('token');
+    var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyLURNdjZpc3ZzVEhRQURZbG1DeFRcL1ZJT0hzcWgrb3pFOEpLS3hYUHFKSUZFZ2NtR3hZR3YySmdER1czVXVpRE5YVFFqeUtqdjBpbzVOQWFmK0p1anF2bjZiYXZoWUlESlg2dz09IiwiaXNzIjoidHVrdGFrLXNpbGhvdWV0dGUiLCJleHAiOjE0NjUzMjU2MDYsImlhdCI6MTQ2NTI4MjQwNiwianRpIjoiNzI5ZDI3ZDdlMWU1MDZmYjc2YzJiNzA3MTA2MTI2Zjc0NWZjMjFmNmFiNDIwN2Y2M2I3NDk1YzQ1ZGNhNjRmNDEzNDZhYWFjYWY2MzhkN2NiNzAwNzhjNjVhYWRiMzQwNmRkN2Y2NzEwNzBkNjJjZmQ3ZjhhOWFkNDhlMDU1NGI0YTllMWVhYzMxM2FiODNkNjliYzAxMGFmMjQ0YWVjMGFmYWQxZWQ1NGQ1MjljMzg5NTlhOWRlMWI3NzBiZWM4YmIzMDExNWQ3NzIwMTY2NGJjNmUwMjcxNDg2MzAyMDMwMTI1YzU3YWJmMTFlYmYzIn0.q0ROYlRSCo2dVKsLf9jDQvPrgyo_gKPFN3dGspZ9xp8";
+    function create_btn() {
+        var title = $('input:text[name="title"]').val();
+        var description = $('input:text[name="description"]').val();
+        var thumbnail = $('input:text[name="thumbnail"]').val();
+        var operators = [];
+        var isPrivate = $('input:radio[name="isPrivate"]:checked').val();
+        if (isPrivate == 'true') isPrivate = true;
+        else if (isPrivate == 'false') isPrivate = false;
+
+        var data = {
+            title : title,
+            description: description,
+            thumbnail : thumbnail,
+            operators : operators,
+            isPrivate : isPrivate
+        };
+
+        console.log(data);
+        window.data = data;
+
+        if (title != "") {
+            var obj =  {
+                type: 'POST',
+                url: '/v1/sites',
+//                    dataType: 'json',
+                contentType:'application/json',
+//                    crossDomain: true,
+                headers: {
+                    'X-AUTH-TOKEN': token
+                },
+                data: JSON.stringify(data),
+                success: function (msg) {
+                    console.log(msg);
+                    location.href = "list";
+                },
+                error: function (request, status, error) {
+                    console.log("error", error);
+                    console.log("status", status);
+                }
+            };
+            console.log(obj)
+            $.ajax(obj);
+
+        } else {
+            alert("Title의 입력을 확인해 주십시오.");
+        }
+         console.log("end");
+    }
+    function cancel_btn() {
+        location.href = "list";
+    }
+</script>
+</body>
+</html>

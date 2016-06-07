@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../commonHeader.ejs %>
+    <% include ../commonScripts.ejs %>
+</head>
+<body>
+<div id="wrapper">
+    <% include ../commonAsideLeft.ejs %>
+    <% include ../commonAsideTop.ejs %>
+
+    <section id="middle" style="margin-bottom: 50px">
+        <!-- page title -->
+        <header id="page-header">
+            <h1>Sites List</h1>
+            <ol class="breadcrumb">
+                <li><a href="#">Sites Management</a></li>
+                <li class="active">Sites List</li>
+            </ol>
+        </header>
+        <!-- /page title -->
+
+        <!-- page body -->
+        <div style="display: flex;">
+            <table class="table table-condensed table-striped" id="excelDataTable"
+                   style="width:1000px;margin: 50px 5px 0 50px">
+                <tr class="table-header">
+                    <!--<th><label for="all-checkBox"></label><input type="checkbox" id="all-checkBox" value="check"></th>-->
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Update And Delete</th>
+                </tr>
+            </table>
+        </div>
+        <div id="page-number">
+            <button type="button" class="btn btn-stop" style="margin: 10px 0 0 930px"
+                    onclick="siteCreate()">Create
+            </button>
+            <nav id="number" style="display: inline-block;width:800px;text-align: center">
+            </nav>
+        </div>
+    </section>
+</div>
+
+<script>
+    var myList = [];
+//    var token = Cookies.get('token');
+    var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyLURNdjZpc3ZzVEhRQURZbG1DeFRcL1ZJT0hzcWgrb3pFOEpLS3hYUHFKSUZFZ2NtR3hZR3YySmdER1czVXVpRE5YVFFqeUtqdjBpbzVOQWFmK0p1anF2bjZiYXZoWUlESlg2dz09IiwiaXNzIjoidHVrdGFrLXNpbGhvdWV0dGUiLCJleHAiOjE0NjUzMjU2MDYsImlhdCI6MTQ2NTI4MjQwNiwianRpIjoiNzI5ZDI3ZDdlMWU1MDZmYjc2YzJiNzA3MTA2MTI2Zjc0NWZjMjFmNmFiNDIwN2Y2M2I3NDk1YzQ1ZGNhNjRmNDEzNDZhYWFjYWY2MzhkN2NiNzAwNzhjNjVhYWRiMzQwNmRkN2Y2NzEwNzBkNjJjZmQ3ZjhhOWFkNDhlMDU1NGI0YTllMWVhYzMxM2FiODNkNjliYzAxMGFmMjQ0YWVjMGFmYWQxZWQ1NGQ1MjljMzg5NTlhOWRlMWI3NzBiZWM4YmIzMDExNWQ3NzIwMTY2NGJjNmUwMjcxNDg2MzAyMDMwMTI1YzU3YWJmMTFlYmYzIn0.q0ROYlRSCo2dVKsLf9jDQvPrgyo_gKPFN3dGspZ9xp8";
+
+    $(document).ready(function () {
+        console.log("sites list called");
+        $.ajax({
+            type: 'GET',
+            url: '/v1/sites',
+            headers : {
+              'X-AUTH-TOKEN':token,
+            },
+            dataType: "json",
+            crossDomain: true,
+            success: function (msg) {
+                console.log("data", msg);
+                if (msg != null) {
+                    myList = msg
+                    buildHtmlTable();
+                } else {
+                    console.log("parsing fail");
+                }
+            },
+            error: function (request, status, error) {
+                console.log("status", status);
+                console.log("error", error);
+            }
+        });
+    });
+
+    // Builds the HTML Table out of myList json data from Ivy restful service.
+    function buildHtmlTable() {
+        var columns = addAllColumnHeaders(myList);
+
+        for (var i = 0; i < myList.length; i++) {
+            var row$ = $('<tr/>');
+
+            for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+                var cellValue = myList[i][columns[colIndex]];
+
+                if (cellValue == null) {
+                    cellValue = "";
+                }
+                switch (columns[colIndex]) {
+                    case 'id' :
+                        row$.append($('<td class="hover" style="cursor:pointer" onclick="communities_move(this)" id="id"/>').html(cellValue));
+                        break;
+                    case 'title' :
+                        row$.append($('<td class="hover" style="cursor:pointer" onclick="communities_move(this)"/>').html(cellValue));
+                        break;
+                    case 'description' :
+                        row$.append($('<td class="hover" style="cursor:pointer" onclick="communities_move(this)"/>').html(cellValue));
+                        break;
+                    default :
+//                        row$.append($('<td/>').html(cellValue));
+                }
+            }
+            row$.append($('<td class="non-hover"/>').append('<button type="button" class="btn btn-stop " name="update" onclick="update(this)"><i style="padding:0px;font-weight: bold" class="et-pencil"></i></button>').append('<button type="button" class="btn btn-stop " name="update" onclick="site_delete(this)"><i style="padding:0px;font-weight: bold" class="fa fa-remove"></i></button>'));
+            $("#excelDataTable").append(row$);
+        }
+    }
+
+    function addAllColumnHeaders(myList) {
+        var columnSet = [];
+
+        for (var i = 0; i < myList.length; i++) {
+            var rowHash = myList[i];
+            for (var key in rowHash) {
+                if ($.inArray(key, columnSet) == -1) {
+                    columnSet.push(key);
+                }
+            }
+        }
+        return columnSet;
+    }
+
+
+    function siteCreate() {
+        location.href = "create";
+    }
+
+    function communities_move(e) {
+        var siteNumber = $(e).parent().find('#id').html().replace(/[^0-9]/g, '');
+
+        location.href = "/communities/list?siteNumber=" + siteNumber;
+    }
+
+    function update(e) {
+        var siteNumber = $(e).parent().parent().find('#id').html().replace(/[^0-9]/g, '');
+
+        location.href = "update?siteNumber=" + siteNumber;
+    }
+    function site_delete(e) {
+        var result = confirm("삭제 하시겠습니까?")
+        if(result == true) {
+            var siteNumber = $(e).parent().parent().find('#id').html().replace(/[^0-9]/g, '');
+            var url = '/v1/sites/'+ siteNumber;
+
+            $(function () {
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    contentType:'application/json',
+                    headers: {
+                        'X-Auth-Token': token
+                    },
+                    success: function (msg) {
+                        location.reload();
+                    }
+                });
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

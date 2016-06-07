@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../commonHeader.ejs %>
+    <% include ../commonScripts.ejs %>
+
+</head>
+<body>
+<div id="wrapper">
+    <% include ../commonAsideLeft.ejs %>
+    <% include ../commonAsideTop.ejs %>
+
+    <section id="middle" style="margin-bottom: 50px">
+        <!-- page title -->
+        <header id="page-header">
+            <h1>Communities List</h1>
+            <ol class="breadcrumb">
+                <li><a href="#">Communities Management</a></li>
+                <li class="active">Communities List</li>
+            </ol>
+        </header>
+        <!-- /page title -->
+
+        <!-- page body -->
+        <table class="table table-condensed table-striped" id="excelDataTable"
+               style="width:1000px;margin: 50px 5px 0 50px">
+            <tr class="table-header">
+                <!--<th><label for="all-checkBox"></label><input type="checkbox" id="all-checkBox" value="check"></th>-->
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Update And Delete</th>
+            </tr>
+        </table>
+        <div id="page-number">
+            <button type="button" class="btn btn-stop" style="margin: 10px 0 0 930px"
+                    onclick="communityCreate()">Create
+            </button>
+            <nav id="number" style="display: inline-block;width:800px;text-align: center">
+            </nav>
+        </div>
+    </section>
+</div>
+
+<!-- JAVASCRIPT FILES -->
+<script>
+    var myList = [];
+    var token = Cookies.get('token');
+
+    function getQuerystring(paramName) {
+
+        var _tempUrl = window.location.search.substring(1); //url에서 처음부터 '?'까지 삭제
+        console.log(window.location.search.substring(1));
+        console.log(_tempUrl);
+        var _tempArray = _tempUrl.split('&'); // '&'을 기준으로 분리하기
+
+        for (var i = 0; _tempArray.length; i++) {
+            var _keyValuePair = _tempArray[i].split('='); // '=' 을 기준으로 분리하기
+
+            if (_keyValuePair[0] == paramName) { // _keyValuePair[0] : 파라미터 명
+                // _keyValuePair[1] : 파라미터 값
+                return _keyValuePair[1];
+            }
+        }
+    }
+    var url = '/v1/sites/' + getQuerystring('siteNumber') + '/communities';
+    var siteNumber_url = '/v1/sites/' + getQuerystring('siteNumber');
+
+    $(document).ready(function () {
+        $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: "json",
+            crossDomain: true,
+            success: function (msg) {
+                if (msg != null) {
+                    myList = msg
+                    buildHtmlTable();
+                } else {
+                    console.log("parsing fail");
+                }
+            },
+            error: function (request, status, error) {
+            }
+        });
+    });
+
+    // Builds the HTML Table out of myList json data from Ivy restful service.
+    function buildHtmlTable() {
+        var columns = addAllColumnHeaders(myList);
+
+        for (var i = 0; i < myList.length; i++) {
+            var row$ = $('<tr />');
+
+            for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+                var cellValue = myList[i][columns[colIndex]];
+
+                if (cellValue == null) {
+                    cellValue = "";
+                }
+                switch (columns[colIndex]) {
+                    case 'id' :
+                        row$.append($('<td class="hover" style="cursor:pointer" id="id"/>').html(cellValue));
+                        break;
+                    case 'title' :
+                        row$.append($('<td class="hover" style="cursor:pointer"/>').html(cellValue));
+                        break;
+                    case 'description' :
+                        row$.append($('<td class="hover" style="cursor:pointer"/>').html(cellValue));
+                        break;
+                    default :
+//                        row$.append($('<td/>').html(cellValue));
+                }
+            }
+            row$.append($('<td class="non-hover"/>').append('<button type="button" class="btn btn-stop " name="update" onclick="update(this)"><i style="padding:0px;font-weight: bold" class="et-pencil"></i></button>').append('<button type="button" class="btn btn-stop " name="update" onclick="site_delete(this)"><i style="padding:0px;font-weight: bold" class="fa fa-remove"></i></button>'));
+            $("#excelDataTable").append(row$);
+        }
+    }
+
+    function addAllColumnHeaders(myList) {
+        var columnSet = [];
+
+        for (var i = 0; i < myList.length; i++) {
+            var rowHash = myList[i];
+            for (var key in rowHash) {
+                if ($.inArray(key, columnSet) == -1) {
+                    columnSet.push(key);
+                }
+            }
+        }
+        return columnSet;
+    }
+    function communityCreate() {
+        location.href = "create?siteNumber=" + getQuerystring('siteNumber');
+    }
+
+    function update(e) {
+        var number = [];
+        var siteNumber = $(e).parent().parent().find('#id').html().replace(/[^0-9]/g, ' ');
+        for (var j = 0, i = 0; i < siteNumber.length; i++) {
+            if (siteNumber[i] >= '0' && siteNumber < '10')
+                number[j++] = siteNumber[i];
+        }
+
+        location.href = "update?siteNumber=" + number[0] + "&communityNumber=" + number[1];
+    }
+    function site_delete(e) {
+        var result = confirm("삭제 하시겠습니까?")
+        if (result == true) {
+            var number = [];
+            var siteNumber = $(e).parent().parent().find('#id').html().replace(/[^0-9]/g, ' ');
+            for (var j = 0, i = 0; i < siteNumber.length; i++) {
+                if (siteNumber[i] >= '0' && siteNumber < '10')
+                    number[j++] = siteNumber[i];
+            }
+            var url = '/v1/sites/' + number[0] + '/communities/' + number[1];
+
+            $(function () {
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    contentType: 'application/json',
+                    headers: {
+                        'X-Auth-Token': token
+                    },
+                    success: function (msg) {
+                        location.reload();
+                    }
+                });
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include commonHeader.ejs %>
+    <% include commonScripts.ejs %>
+</head>
+<body>
+<div id="wrapper">
+    <% include commonAsideLeft.ejs %>
+    <% include commonAsideTop.ejs %>
+
+    <section id="middle" style="margin-bottom: 50px">
+        <!-- page title -->
+        <header id="page-header">
+            <h1>Home</h1>
+            <ol class="breadcrumb">
+                <li><a href="#">Home</a></li>
+                <li class="active">Index</li>
+            </ol>
+        </header>
+        <!-- /page title -->
+
+        <!-- page body -->
+        <div id="change-body">
+            <div>
+                <p>Server URL</p>
+                <input type="text" placeholder="API_HOST='URL'을 설정해주세요." readonly="readonly" name="url" class="form-control">
+            </div>
+            <div>
+                <p>Token</p>
+                <input type="text" placeholder="Token을 입력해주세요." name="token" class="form-control">
+            </div>
+            <div style="text-align: end">
+                <button class="btn-option"
+                        onclick="adminSetting()">
+                    Save
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    var token;
+    var url;
+
+    $(document).ready(function () {
+        token = Cookies.get('token');
+        buildHtml();
+    });
+
+    function buildHtml() {
+        $('input:text[name=token]').val(token);
+    }
+
+    function adminSetting() {
+        token = $('input:text[name=token]').val();
+        if (!!token)
+            Cookies.set('token', token);
+    }
+</script>
+
+</body>
+</html>

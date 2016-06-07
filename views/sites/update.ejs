@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../commonHeader.ejs %>
+    <% include ../commonScripts.ejs %>
+</head>
+<body>
+<div id="wrapper">
+    <% include ../commonAsideLeft.ejs %>
+    <% include ../commonAsideTop.ejs %>
+
+    <!-- page title -->
+    <section id="middle" style="margin-bottom: 100px">
+        <!-- page title -->
+        <header id="page-header">
+            <h1>Sites List</h1>
+            <ol class="breadcrumb">
+                <li><a href="#">Sites Management</a></li>
+                <li><a href="#">Sites List</a></li>
+                <li class="active">Sites Create</li>
+            </ol>
+        </header>
+        <!-- /page title -->
+
+        <!-- page body -->
+        <div id="change-body">
+            <div>
+                <p>Title</p>
+                <input type="text" name="title" class="form-control">
+            </div>
+            <div>
+                <p>Description</p>
+                <input type="text" name="description" class="form-control">
+            </div>
+            <div>
+                <p>Thumbnail</p>
+                <input type="text" name="thumbnail" class="form-control">
+            </div>
+            <div>
+                <p>Operators</p>
+                <input type="text" name="operators" class="form-control">
+            </div>
+            <div>
+                <p>isPrivate</p>
+                <label class="radio-inline">
+                    <input type="radio" name="isPrivate" id="true" value="true"> True
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isPrivate" id="false" value="false"> False
+                </label>
+            </div>
+            <div style="text-align: end">
+                <button class="btn-option"
+                        onclick="update_btn()">
+                    Update
+                </button>
+                <button class="btn-option" style="margin-left: 10px;"
+                        onclick="cancel_btn()">
+                    Cancel
+                </button>
+            </div>
+
+            <!-- /page body -->
+        </div>
+    </section>
+</div>
+
+<script type="text/javascript">
+    var myList = [];
+    var token = Cookies.get('token');
+
+    function getQuerystring(paramName) {
+        var _tempUrl = window.location.search.substring(1); //url에서 처음부터 '?'까지 삭제
+        var _tempArray = _tempUrl.split('&'); // '&'을 기준으로 분리하기
+
+        for (var i = 0; _tempArray.length; i++) {
+            var _keyValuePair = _tempArray[i].split('='); // '=' 을 기준으로 분리하기
+
+            if (_keyValuePair[0] == paramName) { // _keyValuePair[0] : 파라미터 명
+                // _keyValuePair[1] : 파라미터 값
+                return _keyValuePair[1];
+            }
+        }
+    }
+    var siteNumber = getQuerystring('siteNumber');
+    var url = '/v1/sites/' + siteNumber;
+
+    $(document).ready(function () {
+
+        $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: "JSON",
+            crossDomain: true,
+            success: function (msg) {
+                console.log(msg);
+                myList = msg;
+                buildHtmlTable();
+            },
+            error: function (request, status, error) {
+            }
+        });
+    });
+
+    function buildHtmlTable() {
+        $('input:text[name=title]').val(myList.title);
+        $('input:text[name=description]').val(myList.description);
+        $('input:text[name=thumbnail]').val(myList.thumbnail);
+        $('input:text[name=operators]').val(myList.operators);
+
+        if (myList.isPrivate == true)
+            $("input:radio[id='true']").attr("checked", true);
+        else {
+            $("input:radio[id='false']").attr("checked", true);
+        }
+    }
+
+    function update_btn() {
+        var title = $('input:text[name="title"]').val();
+        var description = $('input:text[name="description"]').val();
+        var thumbnail = $('input:text[name="thumbnail"]').val();
+        var operators = [];
+        var isPrivate = $('input:radio[name="isPrivate"]:checked').val();
+        if (isPrivate == 'true') isPrivate = true;
+        else if (isPrivate == 'false') isPrivate = false;
+
+        var data = {
+            title: title,
+            description: description,
+            thumbnail: thumbnail,
+            operators: operators,
+            isPrivate : isPrivate
+        };
+
+        if (title != "") {
+            $(function () {
+                $.ajax({
+                    type: 'PATCH',
+                    url: url,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    crossDomain: true,
+                    headers: {
+                        'X-Auth-Token': token
+                    },
+                    data: JSON.stringify(data),
+                    success: function (msg) {
+                        location.href = "list";
+                    }
+                });
+            });
+        } else {
+            alert("Title의 입력을 확인해 주십시오.");
+        }
+    }
+    function cancel_btn() {
+        location.href = "list";
+    }
+</script>
+</body>
+</html>
